@@ -82,7 +82,7 @@ function isvalidstr($str)
                 <input type="text" id="pass" name="pass"/><br>
             </div>
             <br>
-            <div class="g-recaptcha" data-sitekey="6LcVO2wUAAAAAD2gGSU2-wFKZOD34P3qV3MaFF4z"></div>
+            <div class="g-recaptcha" data-sitekey=""></div>
             <br>
             <input type="submit" id="submit" name="submit" value="生成"/>
             <input type="reset" value="清空"/>
@@ -91,7 +91,7 @@ function isvalidstr($str)
         if (isset($_POST["submit"])) {
             session_start();
             if (isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
-                $secret = '6LcVO2wUAAAAALSuPXEDfjxWwCe4HQEfLG9VYySg';
+                $secret = '';
                 $gRecaptcha = $_POST['g-recaptcha-response'];
                 $gRecaptcha = "https://recaptcha.net/recaptcha/api/siteverify?secret=" . $secret . "&response=" . $_POST['g-recaptcha-response'];
                 $response = file_get_contents($gRecaptcha);
