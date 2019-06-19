@@ -21,22 +21,6 @@ $sql = mysqli_connect($sqladdr, $sqluser, $sqlpass);
 mysqli_query($sql, "set names utf8mb4;");
 mysqli_select_db($sql, $sqldbnm);
 
-function send_post($url, $post_data)
-{
-    $postdata = http_build_query($post_data);
-    $options = array(
-        'http' => array(
-            'method' => 'POST',
-            'header' => 'Content-type:application/x-www-form-urlencoded',
-            'content' => $postdata,
-            'timeout' => 15 * 60
-        )
-    );
-    $context = stream_context_create($options);
-    $result = file_get_contents($url, false, $context);
-    return $result;
-}
-
 function generate_string($length)
 {
     $str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
@@ -98,71 +82,74 @@ function isvalidstr($str)
                 <input type="text" id="pass" name="pass"/><br>
             </div>
             <br>
-            <input type="hidden" name="token"/>
+            <div class="g-recaptcha" data-sitekey=""></div>
+            <br>
             <input type="submit" id="submit" name="submit" value="生成"/>
             <input type="reset" value="清空"/>
         </form>
         <?php
         if (isset($_POST["submit"])) {
-            $post_data = array(
-                'secret' => '',
-                'response' => $_POST["token"]
-            );
-            $recaptcha_json_result = send_post('https://www.recaptcha.net/recaptcha/api/siteverify', $post_data);
-            $recaptcha_result = json_decode($recaptcha_json_result);
-
-            if ($recaptcha_result->score > 0.5) {
-                $origin = $_POST["origin"];
-                if (substr($origin, 0, 7) == "http://" or substr($origin, 0, 8) == "https://") {
-                    $ip = $_SERVER["REMOTE_ADDR"];
-                    $date = date('Y-m-d');
-                    $time = date('H:i:s');
-                    $custom_short = $_POST["custom_short"];
-                    $custom_times = $_POST["custom_times"];
-                    $custom_pass = $_POST["custom_pass"];
-                    $times = -1;
-                    if ($custom_times == 1) {
-                        $times = $_POST["times"];
-                        if (!preg_match("/^[0-9]+$/u", $times)) {
-                            echo("<script language=\"JavaScript\">alert(\"次数限制输入有误\");</script>");
-                            goto eof;
-                        }
-                    }
-                    $pass = "";
-                    if ($custom_pass == 1) {
-                        $pass = $_POST['pass'];
-                        if (!preg_match("/^[A-Za-z0-9]+$/u", $pass)) {
-                            echo("<script language=\"JavaScript\">alert(\"密码输入不符合要求！\");</script>");
-                            goto eof;
-                        }
-                    }
-                    $short = "";
-                    if ($custom_short == 1) {
-                        $short = $_POST["short"];
-                        if (!preg_match("/^[A-Za-z0-9_]+$/u", $short)) {
-                            echo("<script language=\"JavaScript\">alert(\"短网址后缀输入不符合要求！\");</script>");
-                            goto eof;
-                        } else {
-                            $result = mysqli_query($sql, "select * from url where short='" . $short . "'");
-                            mysqli_data_seek($result, 0);
-                            if (mysqli_num_rows($result)) {
-                                echo("<script language=\"JavaScript\">alert(\"短网址后缀已被使用\");</script>");
+            session_start();
+            if (isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
+                $secret = '';
+                $gRecaptcha = $_POST['g-recaptcha-response'];
+                $gRecaptcha = "https://recaptcha.net/recaptcha/api/siteverify?secret=" . $secret . "&response=" . $_POST['g-recaptcha-response'];
+                $response = file_get_contents($gRecaptcha);
+                $responseData = json_decode($response);
+                if ($responseData->success) {
+                    $origin = $_POST["origin"];
+                    if (substr($origin, 0, 7) == "http://" or substr($origin, 0, 8) == "https://") {
+                        $ip = $_SERVER["REMOTE_ADDR"];
+                        $date = date('Y-m-d');
+                        $time = date('H:i:s');
+                        $custom_short = $_POST["custom_short"];
+                        $custom_times = $_POST["custom_times"];
+                        $custom_pass = $_POST["custom_pass"];
+                        $times = -1;
+                        if ($custom_times == 1) {
+                            $times = $_POST["times"];
+                            if (!preg_match("/^[0-9]+$/u", $times)) {
+                                echo("<script language=\"JavaScript\">alert(\"次数限制输入有误\");</script>");
                                 goto eof;
                             }
                         }
+                        $pass = "";
+                        if ($custom_pass == 1) {
+                            $pass = $_POST['pass'];
+                            if (!preg_match("/^[A-Za-z0-9]+$/u", $pass)) {
+                                echo("<script language=\"JavaScript\">alert(\"密码输入不符合要求！\");</script>");
+                                goto eof;
+                            }
+                        }
+                        $short = "";
+                        if ($custom_short == 1) {
+                            $short = $_POST["short"];
+                            if (!preg_match("/^[A-Za-z0-9_]+$/u", $short)) {
+                                echo("<script language=\"JavaScript\">alert(\"短网址后缀输入不符合要求！\");</script>");
+                                goto eof;
+                            } else {
+                                $result = mysqli_query($sql, "select * from url where short='" . $short . "'");
+                                mysqli_data_seek($result, 0);
+                                if (mysqli_num_rows($result)) {
+                                    echo("<script language=\"JavaScript\">alert(\"短网址后缀已被使用\");</script>");
+                                    goto eof;
+                                }
+                            }
+                        } else {
+                            $short = generate_short();
+                        }
+                        mysqli_query($sql, "insert url values('" . $origin . "','" . $short . "'," . $times . ",'" . $ip . "','" . $date . "','" . $time . "','" . $pass . "','v2')");
+                        echo("<script language=\"JavaScript\">alert(\"成功！\");</script>");
+                        echo("<p>您的短网址为：</p><a href='https://guaiqihen.com/?" . $short . "'>https://guaiqihen.com/?" . $short . "</a>");
                     } else {
-                        $short = generate_short();
+                        echo("<script language=\"JavaScript\">alert(\"原网址格式不正确，请加上协议，如：http://www.guaiqihen.com或https://www.guaiqihen.com\");</script>");
                     }
-                    mysqli_query($sql, "insert url values('" . $origin . "','" . $short . "'," . $times . ",'" . $ip . "','" . $date . "','" . $time . "','" . $pass . "','v3')");
-                    echo("<script language=\"JavaScript\">alert(\"成功！\");</script>");
-                    echo("<p>您的短网址为：</p><a href='https://guaiqihen.com/?" . $short . "'>https://guaiqihen.com/?" . $short . "</a>");
                 } else {
-                    echo("<script language=\"JavaScript\">alert(\"原网址格式不正确，请加上协议，如：http://www.guaiqihen.com或https://www.guaiqihen.com\");</script>");
+                    echo("<script language=\"JavaScript\">alert(\"人机校验失败！\");</script>");
                 }
+
             } else {
-                echo("<script language=\"JavaScript\">alert(\"reCAPTCHA V3验证失败，请使用reCAPTCHA V2重试\");</script>");
-                echo("<script language=\"JavaScript\"> location.replace('/index_v2.php');</script>");
-				
+                echo("<script language=\"JavaScript\">alert(\"请进行人机校验！\");</script>");
             }
         }
         eof:
@@ -229,15 +216,7 @@ function isvalidstr($str)
 </footer>
 
 <!-- Scripts -->
-<script src='https://www.recaptcha.net/recaptcha/api.js?render='></script>
-<script>
-    grecaptcha.ready(function () {
-        grecaptcha.execute('', {action: 'social'}).then(function (token) {
-            if ()
-                $('input[name="token"]').val(token);
-        });
-    });
-</script>
+<script src="https://recaptcha.net/recaptcha/api.js"></script>
 <script src="assets/js/jquery.min.js"></script>
 <script src="assets/js/jquery.scrolly.min.js"></script>
 <script src="assets/js/skel.min.js"></script>
