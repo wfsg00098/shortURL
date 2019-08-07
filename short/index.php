@@ -233,7 +233,6 @@ function isvalidstr($str)
 <script>
     grecaptcha.ready(function () {
         grecaptcha.execute('', {action: 'social'}).then(function (token) {
-            if ()
                 $('input[name="token"]').val(token);
         });
     });
