@@ -21,5 +21,6 @@ if ($pass != "")
         die("密码错误");
     }
 if ($times > 0) mysqli_query($sql, "update url set times=times-1 where short='" . $short . "'");
-echo("<script language=\"JavaScript\"> location.replace('" . $origin . "');</script>");
+//echo("<script language=\"JavaScript\"> location.replace('".$origin."');</script>");
+header("Location: ".$origin);
 eof:
