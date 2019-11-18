@@ -1,7 +1,7 @@
 <?php
 $sqladdr = "localhost";
-$sqluser = "";
-$sqlpass = "";
-$sqldbnm = "";
+$sqluser = "short";
+$sqlpass = "short";
+$sqldbnm = "short";
 $len = 8;
 

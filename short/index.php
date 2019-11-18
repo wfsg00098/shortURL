@@ -105,7 +105,7 @@ function isvalidstr($str)
         <?php
         if (isset($_POST["submit"])) {
             $post_data = array(
-                'secret' => '',
+                'secret' => '6LeHzagUAAAAAJb2IRQfnRaexq2hOjeguptbww1J',
                 'response' => $_POST["token"]
             );
             $recaptcha_json_result = send_post('https://www.recaptcha.net/recaptcha/api/siteverify', $post_data);
@@ -114,7 +114,7 @@ function isvalidstr($str)
             if ($recaptcha_result->score > 0.5) {
                 $origin = $_POST["origin"];
                 if (substr($origin, 0, 7) == "http://" or substr($origin, 0, 8) == "https://") {
-                    $ip = $_SERVER["REMOTE_ADDR"];
+                    $ip = isset($_SERVER["HTTP_CF_CONNECTING_IP"]) ? $_SERVER["HTTP_CF_CONNECTING_IP"] : $_SERVER["REMOTE_ADDR"];
                     $date = date('Y-m-d');
                     $time = date('H:i:s');
                     $custom_short = $_POST["custom_short"];
@@ -229,11 +229,11 @@ function isvalidstr($str)
 </footer>
 
 <!-- Scripts -->
-<script src='https://www.recaptcha.net/recaptcha/api.js?render='></script>
+<script src='https://www.recaptcha.net/recaptcha/api.js?render=6LeHzagUAAAAAOLKJK18PEXr9RvGnzOPJ-DOyRJa'></script>
 <script>
     grecaptcha.ready(function () {
-        grecaptcha.execute('', {action: 'social'}).then(function (token) {
-                $('input[name="token"]').val(token);
+        grecaptcha.execute('6LeHzagUAAAAAOLKJK18PEXr9RvGnzOPJ-DOyRJa', {action: 'social'}).then(function (token) {
+            $('input[name="token"]').val(token);
         });
     });
 </script>

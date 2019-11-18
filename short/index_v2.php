@@ -82,7 +82,7 @@ function isvalidstr($str)
                 <input type="text" id="pass" name="pass"/><br>
             </div>
             <br>
-            <div class="g-recaptcha" data-sitekey=""></div>
+            <div class="g-recaptcha" data-sitekey="6LcVO2wUAAAAAD2gGSU2-wFKZOD34P3qV3MaFF4z"></div>
             <br>
             <input type="submit" id="submit" name="submit" value="生成"/>
             <input type="reset" value="清空"/>
@@ -91,7 +91,7 @@ function isvalidstr($str)
         if (isset($_POST["submit"])) {
             session_start();
             if (isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
-                $secret = '';
+                $secret = '6LcVO2wUAAAAALSuPXEDfjxWwCe4HQEfLG9VYySg';
                 $gRecaptcha = $_POST['g-recaptcha-response'];
                 $gRecaptcha = "https://recaptcha.net/recaptcha/api/siteverify?secret=" . $secret . "&response=" . $_POST['g-recaptcha-response'];
                 $response = file_get_contents($gRecaptcha);
@@ -99,7 +99,7 @@ function isvalidstr($str)
                 if ($responseData->success) {
                     $origin = $_POST["origin"];
                     if (substr($origin, 0, 7) == "http://" or substr($origin, 0, 8) == "https://") {
-                        $ip = $_SERVER["REMOTE_ADDR"];
+                        $ip = isset($_SERVER["HTTP_CF_CONNECTING_IP"]) ? $_SERVER["HTTP_CF_CONNECTING_IP"] : $_SERVER["REMOTE_ADDR"];
                         $date = date('Y-m-d');
                         $time = date('H:i:s');
                         $custom_short = $_POST["custom_short"];
@@ -216,7 +216,7 @@ function isvalidstr($str)
 </footer>
 
 <!-- Scripts -->
-<script src="https://recaptcha.net/recaptcha/api.js"></script>
+<script src="//recaptcha.net/recaptcha/api.js"></script>
 <script src="assets/js/jquery.min.js"></script>
 <script src="assets/js/jquery.scrolly.min.js"></script>
 <script src="assets/js/skel.min.js"></script>
