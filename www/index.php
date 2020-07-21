@@ -5,7 +5,7 @@ $sql = mysqli_connect($sqladdr, $sqluser, $sqlpass);
 mysqli_query($sql, "set names utf8mb4");
 mysqli_select_db($sql, $sqldbnm);
 
-$short = explode('&', $_SERVER["QUERY_STRING"])[0];
+$short = urldecode(explode('&', $_SERVER["QUERY_STRING"])[0]);
 $result = mysqli_query($sql, "select origin,times,password from url where short='" . $short . "'");
 mysqli_data_seek($result, 0);
 if (!mysqli_num_rows($result)) die("无此短网址");

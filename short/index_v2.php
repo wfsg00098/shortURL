@@ -43,11 +43,6 @@ function generate_short()
     return $str;
 }
 
-function isvalidstr($str)
-{
-    if (preg_match("/^[A-Za-z0-9_\x{4e00}-\x{9fa5}]+$/u", $str)) return true;
-    else return false;
-}
 
 ?>
 
@@ -124,7 +119,7 @@ function isvalidstr($str)
                         $short = "";
                         if ($custom_short == 1) {
                             $short = $_POST["short"];
-                            if (!preg_match("/^[A-Za-z0-9_]+$/u", $short)) {
+                            if (!preg_match("/^[A-Za-z0-9_\x{4e00}-\x{9fa5}]+$/u", $short)) {
                                 echo("<script language=\"JavaScript\">alert(\"短网址后缀输入不符合要求！\");</script>");
                                 goto eof;
                             } else {
