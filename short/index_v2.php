@@ -45,7 +45,7 @@ function generate_short()
 
 function isvalidstr($str)
 {
-    if (preg_match("/^[A-Za-z0-9_]+$/u", $str)) return true;
+    if (preg_match("/^[A-Za-z0-9_\x{4e00}-\x{9fa5}]+$/u", $str)) return true;
     else return false;
 }
 
@@ -68,7 +68,7 @@ function isvalidstr($str)
             <label for="custom_pass">密码保护</label><br>
 
             <div id="short_div" style="display:none">
-                <label for="short">短网址后缀(支持字母数字与下划线)</label>
+                <label for="short">短网址后缀(支持汉字字母数字与下划线)</label>
                 <input type="text" id="short" name="short"/><br>
             </div>
 
